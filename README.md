@@ -1,0 +1,1 @@
+一个基于Kotlin代码开发的Salt Player for Windows的窗口雪花飘落特效程序，目前尚未完善，仅供娱乐
