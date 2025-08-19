@@ -33,7 +33,7 @@ test {
     useJUnitPlatform()
 }
 
-def pluginClass = "com.jingnb666.saltSnowPlugin"
+def pluginClass = "com.jingnb666.saltSnowPlugin.Main"
 def pluginId = "雪花窗口插件"
 def pluginVersion = "1.0.0"
 def pluginProvider = "CatCat. & GaodaGG"
@@ -58,7 +58,13 @@ tasks.register("plugin", Jar) {
     into("classes") {
         with(tasks.named("jar").get())
     }
+
     dependsOn(configurations.runtimeClasspath)
+
+    into("resources") {
+        from("src/main/resources")
+    }
+
     into("lib") {
         from({
             configurations.runtimeClasspath
