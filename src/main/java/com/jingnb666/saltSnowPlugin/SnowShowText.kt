@@ -52,7 +52,6 @@ fun showSnow(targetFrame: JFrame): JWindow? {
 
     overlayWindow = JWindow(targetFrame)
     overlayWindow.background = Color(0, 0, 0, 0)
-    overlayWindow.isAlwaysOnTop = true
 
     // 生成一批雪花
     fun generateBatch(width: Int) = synchronized(flakes) {
@@ -146,12 +145,15 @@ fun showSnow(targetFrame: JFrame): JWindow? {
 
         fun syncOverlay() {
             if (targetFrame.isShowing) {
-                overlayWindow.bounds = targetFrame.bounds
-                if (!overlayWindow.isVisible) {
+                overlayWindow.location = targetFrame.locationOnScreen
+                overlayWindow.size = targetFrame.size
+
+                if (targetFrame.isActive && !overlayWindow.isVisible) {
                     overlayWindow.isVisible = true
-                    // 首次可见时生成雪花并启动计时器
-                    generateBatch(targetFrame.width)
-                    timer.start()
+                    if (!timer.isRunning) {
+                        generateBatch(targetFrame.width)
+                        timer.start()
+                    }
                 }
             } else {
                 if (overlayWindow.isVisible) {
@@ -178,6 +180,18 @@ fun showSnow(targetFrame: JFrame): JWindow? {
                     timer.stop()
                 }
             }
+
+            /*
+             * 这段代码会在窗口失去焦点时隐藏雪花窗口
+             * 我用着怪怪的
+             * 不清楚要不要保留
+             */
+//            override fun windowDeactivated(e: WindowEvent?) {
+//                if (overlayWindow.isVisible) {
+//                    overlayWindow.isVisible = false
+//                    timer.stop()
+//                }
+//            }
 
             override fun windowDeiconified(e: WindowEvent?) {
                 syncOverlay()

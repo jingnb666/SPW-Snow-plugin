@@ -35,7 +35,7 @@ test {
 
 def pluginClass = "com.jingnb666.saltSnowPlugin.Main"
 def pluginId = "雪花窗口插件"
-def pluginVersion = "1.0.0"
+def pluginVersion = "1.1.0"
 def pluginProvider = "CatCat. & GaodaGG"
 
 tasks.named("jar") {
