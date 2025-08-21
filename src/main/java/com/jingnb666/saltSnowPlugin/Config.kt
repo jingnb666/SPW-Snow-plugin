@@ -85,7 +85,7 @@ object Config {
     }
 
     fun getSnowIconPath(): String {
-        return configData?.snowIconPath ?: "snow.png"
+        return configData?.snowIconPath ?: ""
     }
 
     fun getSnowDensity(): Int {

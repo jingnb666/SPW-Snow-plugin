@@ -9,6 +9,7 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
+import java.io.File
 import java.net.URI
 import java.util.*
 import javax.imageio.ImageIO
@@ -41,9 +42,13 @@ fun showSnow(targetFrame: JFrame): JWindow? {
     val snowIconPath = Config.getSnowIconPath()
 
     val img: BufferedImage = try {
-        ImageIO.read(URI("file:///$snowIconPath").toURL())
+        val url = URI("file:///$snowIconPath").toURL()
+        if (!File(url.path).exists()) throw Exception("File not exists")
+        ImageIO.read(url)
     } catch (e: Exception) {
-        WorkshopApi.instance.ui.toast("Could not read Snow Icon, $snowIconPath", WorkshopApi.Ui.ToastType.Error)
+        if (snowIconPath.isNotEmpty())
+            WorkshopApi.instance.ui.toast("Could not read Snow Icon, $snowIconPath", WorkshopApi.Ui.ToastType.Error)
+
         e.printStackTrace()
         ImageIO.read(Main::class.java.classLoader.getResource("snow.png"))
     }
