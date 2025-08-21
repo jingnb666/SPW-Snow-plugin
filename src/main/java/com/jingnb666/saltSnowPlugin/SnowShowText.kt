@@ -43,14 +43,16 @@ fun showSnow(targetFrame: JFrame): JWindow? {
 
     val img: BufferedImage = try {
         val url = URI("file:///$snowIconPath").toURL()
-        if (!File(url.path).exists()) throw Exception("File not exists")
+        val file = File(url.path)
+        if (!file.exists() || !file.isFile || snowIconPath.isEmpty()) throw Exception("File not exists")
         ImageIO.read(url)
     } catch (e: Exception) {
         if (snowIconPath.isNotEmpty())
             WorkshopApi.instance.ui.toast("Could not read Snow Icon, $snowIconPath", WorkshopApi.Ui.ToastType.Error)
 
         e.printStackTrace()
-        ImageIO.read(Main::class.java.classLoader.getResource("snow.png"))
+        val resource = Main::class.java.classLoader.getResource("snow.png")
+        ImageIO.read(resource)
     }
 
     // 创建可重用的雪花列表
