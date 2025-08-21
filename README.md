@@ -1,8 +1,9 @@
 # 为SPW窗口增加雪花飘落效果
 ## 用法:
-- 将Plugin复制到%appdata%\Salt Player for Windows\workshop
-- 在设置 → 创意工坊 → 模组管理 启用该插件
-- 重启应用
+1. 将Plugin复制到%appdata%\Salt Player for Windows\workshop
+2. 在设置 → 创意工坊 → 模组管理 启用该插件
+3. 重启应用
+4. 修改 %appdata%\Salt Player for Windows\workshop 下的snow_config.json文件
 
 ## 可配置项:
 - snowIconPath: 雪花图标的路径
