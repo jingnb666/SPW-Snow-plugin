@@ -1,6 +1,7 @@
 // SnowShowText.kt (Overlay Window Version - Refined)
 package com.jingnb666.saltSnowPlugin
 
+import com.xuncorp.spw.workshop.api.WorkshopApi
 import java.awt.*
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
@@ -8,10 +9,13 @@ import java.awt.event.WindowAdapter
 import java.awt.event.WindowEvent
 import java.awt.geom.AffineTransform
 import java.awt.image.BufferedImage
+import java.net.URI
 import java.util.*
 import javax.imageio.ImageIO
 import javax.swing.*
 import javax.swing.Timer
+import kotlin.math.cos
+import kotlin.math.sin
 
 // -------------------- 工具函数 --------------------
 private val rng = Random()
@@ -34,28 +38,29 @@ private data class Flake(
 
 // -------------------- 主逻辑 --------------------
 fun showSnow(targetFrame: JFrame): JWindow? {
-    val resource = Main::class.java.classLoader.getResource("snow.png")
-    if (resource == null) {
-        println("Resource 'snow.png' not found")
-        return null
-    }
+    val snowIconPath = Config.getSnowIconPath()
+
     val img: BufferedImage = try {
-        ImageIO.read(resource)
+        ImageIO.read(URI("file:///$snowIconPath").toURL())
     } catch (e: Exception) {
-        println("Failed to read snow.png: ${e.message}")
-        return null
+        WorkshopApi.instance.ui.toast("Could not read Snow Icon, $snowIconPath", WorkshopApi.Ui.ToastType.Error)
+        e.printStackTrace()
+        ImageIO.read(Main::class.java.classLoader.getResource("snow.png"))
     }
 
     // 创建可重用的雪花列表
     val flakes = Collections.synchronizedList(mutableListOf<Flake>())
-    val overlayWindow: JWindow
 
-    overlayWindow = JWindow(targetFrame)
+    val overlayWindow = JWindow(targetFrame)
     overlayWindow.background = Color(0, 0, 0, 0)
 
     // 生成一批雪花
     fun generateBatch(width: Int) = synchronized(flakes) {
-        val total = (20..30).randInt()
+        val snowDensity = Config.getSnowDensity()
+        val snowSpeed = Config.getSnowSpeed()
+        val snowSize = Config.getSnowSize()
+
+        val total = (0..5).randInt() + snowDensity
         repeat(total) {
             val life = (20.0..30.0).rand()
             val angleSpeed = 360.0 * 0.02 / (2.5..3.0).rand()
@@ -63,14 +68,14 @@ fun showSnow(targetFrame: JFrame): JWindow? {
             val grav = (50.0..120.0).rand()
             val dirDeg = (160.0..20.0).rand()
             val dirRad = degToRad(dirDeg)
-            val speed = 80 + rng.nextDouble() * 60
-            val scale = (0.05..0.1).rand()
+            val speed = snowSpeed + rng.nextDouble() * 60
+            val scale = (0.05..0.1).rand() * snowSize
 
             flakes += Flake(
                 x = rng.nextDouble() * width,
                 y = (-30.0..-20.0).rand(),
-                vx = Math.cos(dirRad) * speed + wind,
-                vy = Math.sin(dirRad) * speed,
+                vx = cos(dirRad) * speed + wind,
+                vy = sin(dirRad) * speed,
                 angleDeg = rng.nextDouble() * 360,
                 rotSpeed = if (rng.nextBoolean()) angleSpeed else -angleSpeed,
                 lifeSec = life,
@@ -86,7 +91,6 @@ fun showSnow(targetFrame: JFrame): JWindow? {
 
     val snowPanel = object : JComponent() {
         private val at = AffineTransform()
-        private val g2d: Graphics2D? by lazy { graphics as? Graphics2D }
 
         override fun paintComponent(g: Graphics) {
             super.paintComponent(g)

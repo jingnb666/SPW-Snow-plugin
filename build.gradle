@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'com.jingnb666.saltSnowPlugin'
-version = '1.0.0'
+version = '1.2.0'
 
 java {
     sourceCompatibility = JavaVersion.VERSION_21
@@ -20,6 +20,7 @@ repositories {
 }
 
 dependencies {
+    implementation "com.google.code.gson:gson:2.10.1"
     compileOnly "com.github.Moriafly:spw-workshop-api:0.1.0-dev08"
     kapt "com.github.Moriafly:spw-workshop-api:0.1.0-dev08"
 
@@ -33,7 +34,7 @@ test {
 
 def pluginClass = "com.jingnb666.saltSnowPlugin.Main"
 def pluginId = "雪花窗口插件"
-def pluginVersion = "1.1.0"
+def pluginVersion = version
 def pluginProvider = "CatCat. & GaodaGG"
 
 tasks.named("jar") {
