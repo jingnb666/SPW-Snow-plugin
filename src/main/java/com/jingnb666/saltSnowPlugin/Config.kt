@@ -9,9 +9,9 @@ import java.nio.file.Files
 
 @UnstableSpwWorkshopApi
 object Config {
-    private var configData: ConfigData = ConfigData()
-    var configManager: ConfigManager = WorkshopApi.manager.createConfigManager("雪花窗口插件")
-    var configHelper: ConfigHelper = configManager.getConfig()
+    val configData: ConfigData = ConfigData()
+    val configManager: ConfigManager = WorkshopApi.manager.createConfigManager("雪花窗口插件")
+    val configHelper: ConfigHelper = configManager.getConfig()
 
     init {
         loadConfig()
