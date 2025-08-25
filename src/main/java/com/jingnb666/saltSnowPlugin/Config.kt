@@ -31,8 +31,6 @@ object Config {
         configData.snowSpeed = configHelper.get("snowSpeed", 60.0)
         configData.snowSize = configHelper.get("snowSize", 1.0)
         println("配置文件加载成功")
-
-        WorkshopApi.ui.toast("${getSnowSize()} ${configData.snowSize}", WorkshopApi.Ui.ToastType.Success)
     }
 
     fun saveConfig() {
