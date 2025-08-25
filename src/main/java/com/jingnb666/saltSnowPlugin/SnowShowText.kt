@@ -1,6 +1,9 @@
 // SnowShowText.kt (Overlay Window Version - Refined)
+@file:OptIn(UnstableSpwWorkshopApi::class)
+
 package com.jingnb666.saltSnowPlugin
 
+import com.xuncorp.spw.workshop.api.UnstableSpwWorkshopApi
 import com.xuncorp.spw.workshop.api.WorkshopApi
 import java.awt.*
 import java.awt.event.ComponentAdapter

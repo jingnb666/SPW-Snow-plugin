@@ -1,103 +1,66 @@
 package com.jingnb666.saltSnowPlugin
 
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import java.io.IOException
-import java.nio.file.*
+import com.xuncorp.spw.workshop.api.UnstableSpwWorkshopApi
+import com.xuncorp.spw.workshop.api.WorkshopApi
+import com.xuncorp.spw.workshop.api.config.ConfigHelper
+import com.xuncorp.spw.workshop.api.config.ConfigManager
+import java.nio.file.Files
 
+
+@UnstableSpwWorkshopApi
 object Config {
-    private const val CONFIG_FILE = "snow_config.json"
-    private val configPath: Path = Path.of(
-        System.getenv("APPDATA") + "/Salt Player for Windows/workshop/",
-        CONFIG_FILE
-    )
-    private var configData: ConfigData? = null
+    private var configData: ConfigData = ConfigData()
+    var configManager: ConfigManager = WorkshopApi.manager.createConfigManager("雪花窗口插件")
+    var configHelper: ConfigHelper = configManager.getConfig()
 
     init {
         loadConfig()
-        Thread { this.configWatcher() }.start()
+        configWatcher()
     }
 
     private fun loadConfig() {
-        val configPath: Path = configPath
-        val gson = Gson()
-
-        if (Files.exists(configPath)) {
-            try {
-                Files.newBufferedReader(configPath).use { reader ->
-                    configData = gson.fromJson(reader, ConfigData::class.java)
-                    println("配置文件加载成功")
-                }
-            } catch (e: IOException) {
-                System.err.println("读取配置文件失败: " + e.message)
-                configData = ConfigData()
-            }
-        } else {
+        if (Files.notExists(configHelper.getConfigPath())) {
             // 创建默认配置文件
-            configData = ConfigData()
             saveConfig()
+            return
         }
+
+        configHelper.reload()
+        configData.snowIconPath = configHelper.get("snowIconPath", "")
+        configData.snowDensity = configHelper.get("snowDensity", 20)
+        configData.snowSpeed = configHelper.get("snowSpeed", 60.0)
+        configData.snowSize = configHelper.get("snowSize", 1.0)
+        println("配置文件加载成功")
+
+        WorkshopApi.ui.toast("${getSnowSize()} ${configData.snowSize}", WorkshopApi.Ui.ToastType.Success)
     }
 
     fun saveConfig() {
-        val gson: Gson = GsonBuilder().setPrettyPrinting().create()
-        val configPath: Path = configPath
-        try {
-            Files.newBufferedWriter(configPath).use { writer ->
-                gson.toJson(configData, writer)
-                println("配置文件保存成功")
-            }
-        } catch (e: IOException) {
-            System.err.println("保存配置文件失败: " + e.message)
-        }
+        configHelper.set("snowIconPath", configData.snowIconPath)
+        configHelper.set("snowDensity", configData.snowDensity)
+        configHelper.set("snowSpeed", configData.snowSpeed)
+        configHelper.set("snowSize", configData.snowSize)
+        configHelper.save()
     }
 
     private fun configWatcher() {
-        try {
-            val configPath: Path = configPath.parent
-            val watcher: WatchService = FileSystems.getDefault().newWatchService()
-            configPath.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY)
-
-            while (true) {
-                val key: WatchKey = watcher.take()
-                for (event in key.pollEvents()) {
-                    val kind: WatchEvent.Kind<*>? = event.kind()
-                    if (kind === StandardWatchEventKinds.OVERFLOW) {
-                        continue
-                    }
-
-                    val ev: WatchEvent<Path> = event as WatchEvent<Path>
-                    val fileName: Path = ev.context()
-
-                    if (fileName.toString() == CONFIG_FILE) {
-                        println("配置文件已修改，重新加载配置")
-                        loadConfig()
-                    }
-                }
-
-                key.reset()
-            }
-        } catch (e: IOException) {
-            throw RuntimeException(e)
-        } catch (e: InterruptedException) {
-            throw RuntimeException(e)
-        }
+        configManager.addConfigChangeListener { loadConfig() }
     }
 
     fun getSnowIconPath(): String {
-        return configData?.snowIconPath ?: ""
+        return configData.snowIconPath
     }
 
     fun getSnowDensity(): Int {
-        return configData?.snowDensity ?: 20
+        return configData.snowDensity
     }
 
     fun getSnowSpeed(): Double {
-        return configData?.snowSpeed ?: 50.0
+        return configData.snowSpeed
     }
 
     fun getSnowSize(): Double {
-        return configData?.snowSize ?: 1.0
+        return configData.snowSize
     }
 
     class ConfigData {
